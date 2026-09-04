@@ -1,0 +1,52 @@
+syntax = "proto3";
+package exchange;
+
+option go_package = "mini-stock-exchange-engine/backend/internal/grpcclient;exchange";
+
+service MatchingEngine {
+  rpc SubmitOrder(OrderRequest) returns (OrderResponse);
+  rpc CancelOrder(CancelRequest) returns (CancelResponse);
+  rpc StreamTrades(Empty) returns (stream Trade);
+  rpc StreamBookUpdates(Empty) returns (stream BookSnapshot);
+}
+
+enum Side { BUY = 0; SELL = 1; }
+
+message OrderRequest {
+  string order_id = 1;
+  Side side = 2;
+  double price = 3;
+  int64 quantity = 4;
+  int64 timestamp_ns = 5;
+}
+
+message OrderResponse {
+  string order_id = 1;
+  bool accepted = 2;
+  string message = 3;
+}
+
+message CancelRequest { string order_id = 1; }
+message CancelResponse { bool success = 1; }
+
+message Trade {
+  string trade_id = 1;
+  string buy_order_id = 2;
+  string sell_order_id = 3;
+  double price = 4;
+  int64 quantity = 5;
+  int64 timestamp_ns = 6;
+}
+
+message BookLevel {
+  double price = 1;
+  int64 total_quantity = 2;
+}
+
+message BookSnapshot {
+  repeated BookLevel bids = 1;
+  repeated BookLevel asks = 2;
+  int64 timestamp_ns = 3;
+}
+
+message Empty {}

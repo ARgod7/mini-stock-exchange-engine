@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  engine:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.engine
+    ports:
+      - "50051:50051"
+    networks:
+      - exchange_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - engine
+    networks:
+      - exchange_network
+    environment:
+      - ENGINE_ADDR=engine:50051
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - exchange_network
+
+networks:
+  exchange_network:
+    driver: bridge

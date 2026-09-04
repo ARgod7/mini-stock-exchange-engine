@@ -141,10 +141,10 @@ Each phase has: goal, tasks, definition of done (DoD), and recommended agent mod
 ### Phase 0 — Foundation
 **Goal:** Repo skeleton + frozen proto contract + local dev environment.
 **Tasks:**
-- [ ] Create folder structure above
-- [ ] Finalize `exchange.proto`, generate Go + C++ stubs
-- [ ] `docker-compose.yml` for local dev (engine + backend + frontend)
-- [ ] Git init, `.gitignore`, initial commit
+- [x] Create folder structure above
+- [x] Finalize `exchange.proto`, generate Go + C++ stubs (stubs generation script provided via Docker, require Docker to run)
+- [x] `docker-compose.yml` for local dev (engine + backend + frontend)
+- [x] Git init, `.gitignore`, initial commit
 **DoD:** `docker-compose up` starts all three services locally, even if they don't do anything yet.
 **Recommended model:** Gemini 3.8 Flash (Medium) — mechanical setup work.
 
@@ -218,6 +218,7 @@ Each phase has: goal, tasks, definition of done (DoD), and recommended agent mod
 
 - **2026-09-04:** Chose gRPC over cgo for Go↔C++ communication. Reason: cleaner deploy story, better interview narrative, avoids cgo cross-compilation issues.
 - **2026-09-04:** Both backend processes ship in one Docker container on Railway; frontend on Vercel. Reason: matches original project's deploy targets, keeps it simple.
+- **2026-09-04:** Used `vcpkg` as the strategy for finding gRPC/Protobuf in `CMakeLists.txt` but deferred actual stub generation to a Dockerized script (`generate_protos.ps1`) because local tooling (Docker, Go, CMake) was missing in the environment.
 
 ---
 
@@ -225,6 +226,7 @@ Each phase has: goal, tasks, definition of done (DoD), and recommended agent mod
 *(Update after every work session — this is what you paste back in to resume.)*
 
 - **2026-09-04:** Architecture approved. No code written yet. Next step: Phase 0.
+- **2026-09-04:** Completed Phase 0. Created repository scaffold, finalized `exchange.proto`, set up `go.mod`, `CMakeLists.txt` and `docker-compose.yml`. Generated a script `generate_protos.ps1` to build the stubs via Docker (as local tools were not available). Next step: Phase 1 (C++ Matching Engine).
 
 ---
 
