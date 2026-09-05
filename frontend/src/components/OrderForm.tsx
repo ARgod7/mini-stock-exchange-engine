@@ -1,17 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { postOrder } from '@/lib/api';
 
 export default function OrderForm() {
   const [side, setSide] = useState<'BUY' | 'SELL'>('BUY');
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
   const [error, setError] = useState('');
-  const [lastSubmitted, setLastSubmitted] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [lastSubmitted, setLastSubmitted] = useState<{ id: string; ok: boolean; msg: string } | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setLastSubmitted(null);
 
     const p = parseFloat(price);
     const q = parseInt(quantity, 10);
@@ -25,29 +28,36 @@ export default function OrderForm() {
       return;
     }
 
-    const payload = {
-      order_id: `${side}-${Date.now()}`,
-      side,
-      price: p,
-      quantity: q,
-    };
-
-    console.log('Order payload:', payload);
-    // Step 3b: replace console.log with real fetch POST /orders
-    setLastSubmitted(JSON.stringify(payload, null, 2));
-    setPrice('');
-    setQuantity('');
+    setSubmitting(true);
+    try {
+      const orderId = `${side}-${Date.now()}`;
+      const payload = {
+        order_id: orderId,
+        side,
+        price: p,
+        quantity: q,
+      };
+      
+      const res = await postOrder(payload);
+      setLastSubmitted({ id: orderId, ok: true, msg: res.message });
+      setPrice('');
+      setQuantity('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to submit order');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
-    <div className="bg-gray-800 rounded-lg overflow-hidden">
+    <div className="bg-gray-800 rounded-lg overflow-hidden flex flex-col h-full">
       <div className="px-4 py-3 border-b border-gray-700">
         <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-widest">
           Place Order
         </h2>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4 space-y-4">
+      <form onSubmit={handleSubmit} className="p-4 space-y-4 flex-1">
         {/* Side toggle */}
         <div className="grid grid-cols-2 rounded overflow-hidden border border-gray-600">
           <button
@@ -119,11 +129,11 @@ export default function OrderForm() {
         </div>
 
         {/* Notional estimate */}
-        {price && quantity && !isNaN(parseFloat(price)) && !isNaN(parseInt(quantity)) && (
+        {price && quantity && !isNaN(parseFloat(price)) && !isNaN(parseInt(quantity, 10)) && (
           <div className="text-xs text-gray-500 flex justify-between bg-gray-700/50 rounded px-3 py-2">
             <span>Estimated value</span>
             <span className="font-mono text-gray-300">
-              ${(parseFloat(price) * parseInt(quantity)).toFixed(2)}
+              ${(parseFloat(price) * parseInt(quantity, 10)).toFixed(2)}
             </span>
           </div>
         )}
@@ -136,23 +146,23 @@ export default function OrderForm() {
 
         <button
           type="submit"
-          className={`w-full py-3 rounded font-bold text-white uppercase tracking-widest text-sm transition-all active:scale-[0.98] ${
+          disabled={submitting}
+          className={`w-full py-3 rounded font-bold text-white uppercase tracking-widest text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${
             side === 'BUY'
               ? 'bg-green-700 hover:bg-green-600 shadow-green-900/40 shadow-lg'
               : 'bg-red-700 hover:bg-red-600 shadow-red-900/40 shadow-lg'
           }`}
         >
-          {side === 'BUY' ? '↑ Buy' : '↓ Sell'}
+          {submitting ? 'Submitting...' : side === 'BUY' ? '↑ Buy' : '↓ Sell'}
         </button>
       </form>
 
-      {/* Last submitted preview (mock feedback) */}
+      {/* Last submitted preview */}
       {lastSubmitted && (
-        <div className="border-t border-gray-700 px-4 py-3">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Last order (mock)</p>
-          <pre className="text-xs text-green-400 font-mono whitespace-pre-wrap break-all">
-            {lastSubmitted}
-          </pre>
+        <div className="border-t border-gray-700 px-4 py-3 bg-gray-700/30">
+          <p className="text-xs text-green-400">
+            ✓ Order {lastSubmitted.id} submitted
+          </p>
         </div>
       )}
     </div>

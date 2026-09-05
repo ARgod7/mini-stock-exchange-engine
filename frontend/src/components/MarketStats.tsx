@@ -1,18 +1,4 @@
-type Stats = {
-  last_price: number;
-  volume: number;
-  best_bid: number | null;
-  best_ask: number | null;
-  spread: number | null;
-};
-
-const MOCK_STATS: Stats = {
-  last_price: 102.75,
-  volume: 360,
-  best_bid: 102.50,
-  best_ask: 103.00,
-  spread: 0.50,
-};
+import type { Stats } from '@/lib/api';
 
 function StatCard({
   label,
@@ -33,8 +19,16 @@ function StatCard({
   );
 }
 
-export default function MarketStats() {
-  const s = MOCK_STATS;
+export default function MarketStats({ stats }: { stats: Stats | null }) {
+  if (!stats) {
+    return (
+      <div className="bg-gray-800 rounded-lg px-4 py-3 flex items-center justify-center">
+        <span className="text-gray-500 text-sm font-mono animate-pulse">Loading stats...</span>
+      </div>
+    );
+  }
+
+  const s = stats;
   const fmt = (v: number | null) => (v === null ? '—' : v.toFixed(2));
 
   return (
@@ -44,7 +38,6 @@ export default function MarketStats() {
           <span className="text-white font-mono text-2xl font-bold tabular-nums">
             {s.last_price.toFixed(2)}
           </span>
-          <span className="text-green-500 text-sm font-mono">+0.25 (+0.24%)</span>
         </div>
 
         <div className="flex gap-6 flex-wrap">
