@@ -95,10 +95,26 @@ func (s *Server) handleOrderBook(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(snap)
 }
 
+func mapTrade(t *pb.Trade) map[string]interface{} {
+	return map[string]interface{}{
+		"trade_id":       t.TradeId,
+		"buy_order_id":   t.BuyOrderId,
+		"sell_order_id":  t.SellOrderId,
+		"price":          t.Price,
+		"quantity":       t.Quantity,
+		"timestamp_ns":   t.TimestampNs,
+		"aggressor_side": pb.Side_name[int32(t.AggressorSide)],
+	}
+}
+
 func (s *Server) handleTrades(w http.ResponseWriter, r *http.Request) {
 	trades := s.client.GetTrades()
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(trades)
+	mapped := make([]map[string]interface{}, len(trades))
+	for i, t := range trades {
+		mapped[i] = mapTrade(t)
+	}
+	json.NewEncoder(w).Encode(mapped)
 }
 
 func (s *Server) handleStats(w http.ResponseWriter, r *http.Request) {
@@ -139,3 +155,4 @@ func (s *Server) handleStats(w http.ResponseWriter, r *http.Request) {
 		"spread":     spread,
 	})
 }
+

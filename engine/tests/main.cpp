@@ -27,6 +27,7 @@ void test_exact_match() {
     assert(trades.size() == 1);
     assert(trades[0].price() == 100.0);
     assert(trades[0].quantity() == 10);
+    assert(trades[0].aggressor_side() == exchange::SELL);
     
     auto snap = book.get_snapshot();
     assert(snap.bids_size() == 0);
@@ -58,6 +59,7 @@ void test_partial_fill() {
     
     std::cout << "  [test_partial_fill] Trade quantity: expected 10, actual " << trades[0].quantity() << "\n";
     assert(trades[0].quantity() == 10);
+    assert(trades[0].aggressor_side() == exchange::SELL);
     
     auto snap = book.get_snapshot();
     std::cout << "  [test_partial_fill] Remaining bids levels: expected 0, actual " << snap.bids_size() << "\n";
@@ -101,6 +103,7 @@ void test_price_time_priority() {
     assert(trades[0].sell_order_id() == "O3");
     assert(trades[0].buy_order_id() == "O1");
     assert(trades[0].quantity() == 10);
+    assert(trades[0].aggressor_side() == exchange::SELL);
     
     assert(trades[1].buy_order_id() == "O2");
     assert(trades[1].quantity() == 2);
@@ -167,6 +170,7 @@ void test_sweep_multiple_levels() {
     assert(trades.size() == 2);
     assert(trades[0].price() == 101.0);
     assert(trades[0].quantity() == 10);
+    assert(trades[0].aggressor_side() == exchange::SELL);
     assert(trades[1].price() == 102.0);
     assert(trades[1].quantity() == 5);
     
@@ -216,3 +220,4 @@ int main() {
     std::cout << "ALL TESTS PASSED\n";
     return 0;
 }
+

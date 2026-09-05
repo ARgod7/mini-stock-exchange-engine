@@ -36,6 +36,7 @@ message Trade {
   double price = 4;
   int64 quantity = 5;
   int64 timestamp_ns = 6;
+  Side aggressor_side = 7;
 }
 
 message BookLevel {
@@ -50,3 +51,4 @@ message BookSnapshot {
 }
 
 message Empty {}
+

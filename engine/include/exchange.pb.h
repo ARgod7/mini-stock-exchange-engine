@@ -917,6 +917,7 @@ class Trade PROTOBUF_FINAL :
     kPriceFieldNumber = 4,
     kQuantityFieldNumber = 5,
     kTimestampNsFieldNumber = 6,
+    kAggressorSideFieldNumber = 7,
   };
   // string trade_id = 1;
   void clear_trade_id();
@@ -1020,6 +1021,15 @@ class Trade PROTOBUF_FINAL :
   void _internal_set_timestamp_ns(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
+  // .exchange.Side aggressor_side = 7;
+  void clear_aggressor_side();
+  ::exchange::Side aggressor_side() const;
+  void set_aggressor_side(::exchange::Side value);
+  private:
+  ::exchange::Side _internal_aggressor_side() const;
+  void _internal_set_aggressor_side(::exchange::Side value);
+  public:
+
   // @@protoc_insertion_point(class_scope:exchange.Trade)
  private:
   class _Internal;
@@ -1033,6 +1043,7 @@ class Trade PROTOBUF_FINAL :
   double price_;
   ::PROTOBUF_NAMESPACE_ID::int64 quantity_;
   ::PROTOBUF_NAMESPACE_ID::int64 timestamp_ns_;
+  int aggressor_side_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_exchange_2eproto;
 };
@@ -2257,6 +2268,26 @@ inline void Trade::_internal_set_timestamp_ns(::PROTOBUF_NAMESPACE_ID::int64 val
 inline void Trade::set_timestamp_ns(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_timestamp_ns(value);
   // @@protoc_insertion_point(field_set:exchange.Trade.timestamp_ns)
+}
+
+// .exchange.Side aggressor_side = 7;
+inline void Trade::clear_aggressor_side() {
+  aggressor_side_ = 0;
+}
+inline ::exchange::Side Trade::_internal_aggressor_side() const {
+  return static_cast< ::exchange::Side >(aggressor_side_);
+}
+inline ::exchange::Side Trade::aggressor_side() const {
+  // @@protoc_insertion_point(field_get:exchange.Trade.aggressor_side)
+  return _internal_aggressor_side();
+}
+inline void Trade::_internal_set_aggressor_side(::exchange::Side value) {
+  
+  aggressor_side_ = value;
+}
+inline void Trade::set_aggressor_side(::exchange::Side value) {
+  _internal_set_aggressor_side(value);
+  // @@protoc_insertion_point(field_set:exchange.Trade.aggressor_side)
 }
 
 // -------------------------------------------------------------------

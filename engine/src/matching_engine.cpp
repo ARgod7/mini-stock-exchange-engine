@@ -37,6 +37,7 @@ bool OrderBook::submit_order(const exchange::OrderRequest& req, std::vector<exch
                 trade.set_price(best_ask_price);
                 trade.set_quantity(trade_qty);
                 trade.set_timestamp_ns(current_time_ns());
+                trade.set_aggressor_side(req.side());
                 out_trades.push_back(trade);
                 
                 remaining_qty -= trade_qty;
@@ -71,6 +72,7 @@ bool OrderBook::submit_order(const exchange::OrderRequest& req, std::vector<exch
                 trade.set_price(best_bid_price);
                 trade.set_quantity(trade_qty);
                 trade.set_timestamp_ns(current_time_ns());
+                trade.set_aggressor_side(req.side());
                 out_trades.push_back(trade);
                 
                 remaining_qty -= trade_qty;
@@ -177,3 +179,4 @@ exchange::BookSnapshot OrderBook::get_snapshot() const {
 }
 
 } // namespace engine
+

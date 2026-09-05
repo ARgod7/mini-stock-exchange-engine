@@ -252,3 +252,4 @@ Each phase has: goal, tasks, definition of done (DoD), and recommended agent mod
 
 
 - **2026-09-06:** Fixed duplicate trade bug in Phase 3b. **Cause:** React 18 Strict Mode mounts, unmounts, and remounts components. The \useExchangeSocket\ hook's cleanup function closed the first WebSocket, but its \onclose\ handler used a mutable ref (\deadRef\) which was reset to \alse\ by the second mount before the first socket finished closing. This caused the first socket to trigger a reconnect, resulting in *two* active WebSocket connections pushing identical trades to the frontend state. **Fix:** 1) Replaced the component-level \deadRef\ with a closure-scoped \isDead\ variable inside the \useEffect\ to ensure each connection instance accurately tracks its own lifecycle. 2) Added a \Set<string>\ in \Dashboard.tsx\ to explicitly deduplicate incoming WS trades by \	rade_id\ to guard against race conditions between the initial \GET /trades\ fetch and the WS stream.
+

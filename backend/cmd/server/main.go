@@ -11,6 +11,19 @@ import (
 	"mini-stock-exchange-engine/backend/internal/ws"
 )
 
+
+func mapTrade(t *pb.Trade) map[string]interface{} {
+	return map[string]interface{}{
+		"trade_id":       t.TradeId,
+		"buy_order_id":   t.BuyOrderId,
+		"sell_order_id":  t.SellOrderId,
+		"price":          t.Price,
+		"quantity":       t.Quantity,
+		"timestamp_ns":   t.TimestampNs,
+		"aggressor_side": pb.Side_name[int32(t.AggressorSide)],
+	}
+}
+
 func main() {
 	engineAddr := os.Getenv("ENGINE_ADDR")
 	if engineAddr == "" {
@@ -27,10 +40,10 @@ func main() {
 	// WebSockets
 	hub := ws.NewHub()
 	
-	client.OnTrade = func(t *pb.Trade) {
+		client.OnTrade = func(t *pb.Trade) {
 		hub.Broadcast(map[string]interface{}{
 			"type": "trade",
-			"data": t,
+			"data": mapTrade(t),
 		})
 	}
 	client.OnBookUpdate = func(b *pb.BookSnapshot) {

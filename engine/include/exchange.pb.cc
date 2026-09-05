@@ -208,6 +208,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_exchange_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::exchange::Trade, price_),
   PROTOBUF_FIELD_OFFSET(::exchange::Trade, quantity_),
   PROTOBUF_FIELD_OFFSET(::exchange::Trade, timestamp_ns_),
+  PROTOBUF_FIELD_OFFSET(::exchange::Trade, aggressor_side_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::exchange::BookLevel, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -235,9 +236,9 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 18, -1, sizeof(::exchange::CancelRequest)},
   { 24, -1, sizeof(::exchange::CancelResponse)},
   { 30, -1, sizeof(::exchange::Trade)},
-  { 41, -1, sizeof(::exchange::BookLevel)},
-  { 48, -1, sizeof(::exchange::BookSnapshot)},
-  { 56, -1, sizeof(::exchange::Empty)},
+  { 42, -1, sizeof(::exchange::BookLevel)},
+  { 49, -1, sizeof(::exchange::BookSnapshot)},
+  { 57, -1, sizeof(::exchange::Empty)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -259,23 +260,24 @@ const char descriptor_table_protodef_exchange_2eproto[] PROTOBUF_SECTION_VARIABL
   "se\022\020\n\010order_id\030\001 \001(\t\022\020\n\010accepted\030\002 \001(\010\022\017"
   "\n\007message\030\003 \001(\t\"!\n\rCancelRequest\022\020\n\010orde"
   "r_id\030\001 \001(\t\"!\n\016CancelResponse\022\017\n\007success\030"
-  "\001 \001(\010\"}\n\005Trade\022\020\n\010trade_id\030\001 \001(\t\022\024\n\014buy_"
-  "order_id\030\002 \001(\t\022\025\n\rsell_order_id\030\003 \001(\t\022\r\n"
-  "\005price\030\004 \001(\001\022\020\n\010quantity\030\005 \001(\003\022\024\n\014timest"
-  "amp_ns\030\006 \001(\003\"2\n\tBookLevel\022\r\n\005price\030\001 \001(\001"
-  "\022\026\n\016total_quantity\030\002 \001(\003\"j\n\014BookSnapshot"
-  "\022!\n\004bids\030\001 \003(\0132\023.exchange.BookLevel\022!\n\004a"
-  "sks\030\002 \003(\0132\023.exchange.BookLevel\022\024\n\014timest"
-  "amp_ns\030\003 \001(\003\"\007\n\005Empty*\031\n\004Side\022\007\n\003BUY\020\000\022\010"
-  "\n\004SELL\020\0012\206\002\n\016MatchingEngine\022>\n\013SubmitOrd"
-  "er\022\026.exchange.OrderRequest\032\027.exchange.Or"
-  "derResponse\022@\n\013CancelOrder\022\027.exchange.Ca"
-  "ncelRequest\032\030.exchange.CancelResponse\0222\n"
-  "\014StreamTrades\022\017.exchange.Empty\032\017.exchang"
-  "e.Trade0\001\022>\n\021StreamBookUpdates\022\017.exchang"
-  "e.Empty\032\026.exchange.BookSnapshot0\001BAZ\?min"
-  "i-stock-exchange-engine/backend/internal"
-  "/grpcclient;exchangeb\006proto3"
+  "\001 \001(\010\"\245\001\n\005Trade\022\020\n\010trade_id\030\001 \001(\t\022\024\n\014buy"
+  "_order_id\030\002 \001(\t\022\025\n\rsell_order_id\030\003 \001(\t\022\r"
+  "\n\005price\030\004 \001(\001\022\020\n\010quantity\030\005 \001(\003\022\024\n\014times"
+  "tamp_ns\030\006 \001(\003\022&\n\016aggressor_side\030\007 \001(\0162\016."
+  "exchange.Side\"2\n\tBookLevel\022\r\n\005price\030\001 \001("
+  "\001\022\026\n\016total_quantity\030\002 \001(\003\"j\n\014BookSnapsho"
+  "t\022!\n\004bids\030\001 \003(\0132\023.exchange.BookLevel\022!\n\004"
+  "asks\030\002 \003(\0132\023.exchange.BookLevel\022\024\n\014times"
+  "tamp_ns\030\003 \001(\003\"\007\n\005Empty*\031\n\004Side\022\007\n\003BUY\020\000\022"
+  "\010\n\004SELL\020\0012\206\002\n\016MatchingEngine\022>\n\013SubmitOr"
+  "der\022\026.exchange.OrderRequest\032\027.exchange.O"
+  "rderResponse\022@\n\013CancelOrder\022\027.exchange.C"
+  "ancelRequest\032\030.exchange.CancelResponse\0222"
+  "\n\014StreamTrades\022\017.exchange.Empty\032\017.exchan"
+  "ge.Trade0\001\022>\n\021StreamBookUpdates\022\017.exchan"
+  "ge.Empty\032\026.exchange.BookSnapshot0\001BAZ\?mi"
+  "ni-stock-exchange-engine/backend/interna"
+  "l/grpcclient;exchangeb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_exchange_2eproto_deps[1] = {
 };
@@ -291,7 +293,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exc
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_exchange_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_exchange_2eproto = {
-  false, false, descriptor_table_protodef_exchange_2eproto, "exchange.proto", 948,
+  false, false, descriptor_table_protodef_exchange_2eproto, "exchange.proto", 989,
   &descriptor_table_exchange_2eproto_once, descriptor_table_exchange_2eproto_sccs, descriptor_table_exchange_2eproto_deps, 8, 0,
   schemas, file_default_instances, TableStruct_exchange_2eproto::offsets,
   file_level_metadata_exchange_2eproto, 8, file_level_enum_descriptors_exchange_2eproto, file_level_service_descriptors_exchange_2eproto,
@@ -1339,8 +1341,8 @@ Trade::Trade(const Trade& from)
       GetArena());
   }
   ::memcpy(&price_, &from.price_,
-    static_cast<size_t>(reinterpret_cast<char*>(&timestamp_ns_) -
-    reinterpret_cast<char*>(&price_)) + sizeof(timestamp_ns_));
+    static_cast<size_t>(reinterpret_cast<char*>(&aggressor_side_) -
+    reinterpret_cast<char*>(&price_)) + sizeof(aggressor_side_));
   // @@protoc_insertion_point(copy_constructor:exchange.Trade)
 }
 
@@ -1350,8 +1352,8 @@ void Trade::SharedCtor() {
   buy_order_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   sell_order_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(&price_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&timestamp_ns_) -
-      reinterpret_cast<char*>(&price_)) + sizeof(timestamp_ns_));
+      reinterpret_cast<char*>(&aggressor_side_) -
+      reinterpret_cast<char*>(&price_)) + sizeof(aggressor_side_));
 }
 
 Trade::~Trade() {
@@ -1392,8 +1394,8 @@ void Trade::Clear() {
   buy_order_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   sell_order_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::memset(&price_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&timestamp_ns_) -
-      reinterpret_cast<char*>(&price_)) + sizeof(timestamp_ns_));
+      reinterpret_cast<char*>(&aggressor_side_) -
+      reinterpret_cast<char*>(&price_)) + sizeof(aggressor_side_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1451,6 +1453,14 @@ const char* Trade::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::inte
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
           timestamp_ns_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .exchange.Side aggressor_side = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
+          ::PROTOBUF_NAMESPACE_ID::uint64 val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+          _internal_set_aggressor_side(static_cast<::exchange::Side>(val));
         } else goto handle_unusual;
         continue;
       default: {
@@ -1529,6 +1539,13 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(6, this->_internal_timestamp_ns(), target);
   }
 
+  // .exchange.Side aggressor_side = 7;
+  if (this->aggressor_side() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteEnumToArray(
+      7, this->_internal_aggressor_side(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -1585,6 +1602,12 @@ size_t Trade::ByteSizeLong() const {
         this->_internal_timestamp_ns());
   }
 
+  // .exchange.Side aggressor_side = 7;
+  if (this->aggressor_side() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::EnumSize(this->_internal_aggressor_side());
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -1634,6 +1657,9 @@ void Trade::MergeFrom(const Trade& from) {
   if (from.timestamp_ns() != 0) {
     _internal_set_timestamp_ns(from._internal_timestamp_ns());
   }
+  if (from.aggressor_side() != 0) {
+    _internal_set_aggressor_side(from._internal_aggressor_side());
+  }
 }
 
 void Trade::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -1661,8 +1687,8 @@ void Trade::InternalSwap(Trade* other) {
   buy_order_id_.Swap(&other->buy_order_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   sell_order_id_.Swap(&other->sell_order_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Trade, timestamp_ns_)
-      + sizeof(Trade::timestamp_ns_)
+      PROTOBUF_FIELD_OFFSET(Trade, aggressor_side_)
+      + sizeof(Trade::aggressor_side_)
       - PROTOBUF_FIELD_OFFSET(Trade, price_)>(
           reinterpret_cast<char*>(&price_),
           reinterpret_cast<char*>(&other->price_));
