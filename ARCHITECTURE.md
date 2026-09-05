@@ -247,3 +247,4 @@ Each phase has: goal, tasks, definition of done (DoD), and recommended agent mod
 2. Say: "We are on Phase X, task Y. Continue from there."
 3. Point the agent at the actual repo state (it should read the existing code, not assume from this doc alone — this doc describes intent, the repo is ground truth for what's actually built).
 4. After the session, update Section 6 and 7 before you run out of context again.
+
