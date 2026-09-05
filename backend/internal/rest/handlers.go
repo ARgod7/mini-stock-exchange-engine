@@ -113,18 +113,20 @@ func (s *Server) handleStats(w http.ResponseWriter, r *http.Request) {
 		volume += t.Quantity
 	}
 	
-	var bestBid, bestAsk float64
-	var spread float64
+	var bestBid, bestAsk, spread *float64
 	
 	if snap != nil {
 		if len(snap.Bids) > 0 {
-			bestBid = snap.Bids[0].Price
+			v := snap.Bids[0].Price
+			bestBid = &v
 		}
 		if len(snap.Asks) > 0 {
-			bestAsk = snap.Asks[0].Price
+			v := snap.Asks[0].Price
+			bestAsk = &v
 		}
-		if bestBid > 0 && bestAsk > 0 {
-			spread = bestAsk - bestBid
+		if bestBid != nil && bestAsk != nil {
+			v := *bestAsk - *bestBid
+			spread = &v
 		}
 	}
 	
