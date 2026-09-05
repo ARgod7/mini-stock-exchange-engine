@@ -13,6 +13,8 @@ class MatchingEngineServiceImpl final : public exchange::MatchingEngine::Service
 public:
     MatchingEngineServiceImpl() = default;
     
+    void Run(const std::string& server_address);
+    
     grpc::Status SubmitOrder(grpc::ServerContext* context, const exchange::OrderRequest* request,
                              exchange::OrderResponse* response) override;
                              
@@ -28,9 +30,10 @@ public:
 private:
     OrderBook book_;
     
-    // For simplicity in this assignment, we will just hold the latest state 
-    // and broadcast to streams. Since gRPC streams block on write, a real 
-    // system would use queues per client.
+    std::mutex streams_mu_;
+    std::condition_variable cv_;
+    std::vector<exchange::Trade> new_trades_;
+    bool book_updated_ = false;
 };
 
 } // namespace engine

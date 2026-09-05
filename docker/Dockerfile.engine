@@ -15,4 +15,4 @@ COPY engine/ /app/engine/
 WORKDIR /app/engine
 RUN mkdir build && cd build && cmake .. && make
 
-CMD ["./build/engine_test"]
+CMD ["./build/engine_server"]

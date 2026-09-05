@@ -1,2 +1,12 @@
-FROM ubuntu:22.04
-CMD ["echo", "Backend service placeholder"]
+FROM golang:1.22
+
+WORKDIR /app
+COPY backend/go.mod ./backend/
+# We need to copy proto generated files
+COPY backend/ /app/backend/
+
+WORKDIR /app/backend
+RUN go mod tidy
+RUN go build -o backend_server ./cmd/server
+
+CMD ["./backend_server"]

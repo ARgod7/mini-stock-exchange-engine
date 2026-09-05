@@ -16,6 +16,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Add our engine source files
 file(GLOB ENGINE_SRCS "src/*.cpp")
+list(REMOVE_ITEM ENGINE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 
 add_library(engine_lib
     ${ENGINE_SRCS}
@@ -29,3 +30,7 @@ target_link_libraries(engine_lib PUBLIC ${gRPC_LIBRARIES} protobuf::libprotobuf)
 # Test executable
 add_executable(engine_test tests/main.cpp)
 target_link_libraries(engine_test PRIVATE engine_lib)
+
+# Server executable
+add_executable(engine_server src/main.cpp)
+target_link_libraries(engine_server PRIVATE engine_lib)

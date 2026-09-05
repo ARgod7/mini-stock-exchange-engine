@@ -213,34 +213,31 @@ Each phase has: goal, tasks, definition of done (DoD), and recommended agent mod
 
 ---
 
-## 6. Decisions Log
-*(Append here whenever a design decision is made or changed — don't rely on memory across sessions.)*
+## 6. Architecture & Design Decisions (Log)
 
 - **2026-09-04:** Chose gRPC over cgo for Go↔C++ communication. Reason: cleaner deploy story, better interview narrative, avoids cgo cross-compilation issues.
 - **2026-09-04:** Both backend processes ship in one Docker container on Railway; frontend on Vercel. Reason: matches original project's deploy targets, keeps it simple.
 - **2026-09-04:** Used `vcpkg` as the strategy for finding gRPC/Protobuf in `CMakeLists.txt` but deferred actual stub generation to a Dockerized script (`generate_protos.ps1`) because local tooling (Docker, Go, CMake) was missing in the environment.
 - **2026-09-05:** C++ matching engine data structure chosen: `std::map` keyed by price, containing `std::deque` of orders. Reason: provides fast sorted price level traversal, while `deque` supports fast front-popping (FIFO match) and middle-erasure (cancel).
 - **2026-09-05:** Used Ubuntu `pkg-config` in `CMakeLists.txt` rather than pure `find_package` for `gRPC` because the default Ubuntu `libgrpc++-dev` doesn't export the `gRPCConfig.cmake` file properly.
+- **2026-09-05:** Go backend concurrency handles streams via a `sync.RWMutex` over the cached order book and trade slice in the gRPC client, and a separate `sync.RWMutex` in the WebSocket `Hub` for managing connected clients. Broadcasts push to buffered channels to prevent slow clients from blocking the gRPC consumer goroutines.
 
 ---
 
 ## 7. Status Log
-*(Update after every work session — this is what you paste back in to resume.)*
 
 - **2026-09-04:** Architecture approved. No code written yet. Next step: Phase 0.
 - **2026-09-04:** Completed Phase 0. Created repository scaffold, finalized `exchange.proto`, set up `go.mod`, `CMakeLists.txt` and `docker-compose.yml`. Generated a script `generate_protos.ps1` to build the stubs via Docker (as local tools were not available). Next step: Phase 1 (C++ Matching Engine).
-- **2026-09-05:** Completed Phase 1 (Steps 1a and 1b). Implemented the C++ matching engine (OrderBook) with price-time priority matching, partial fills, thread-safety, and order cancellation. Wired it to the `SubmitOrder` and `CancelOrder` gRPC endpoints. Verified by compiling and running unit tests inside a Docker container:
+- **2026-09-05:** Completed Phase 1 (Steps 1a and 1b). Implemented the C++ matching engine (OrderBook) with price-time priority matching, partial fills, thread-safety, and order cancellation. Wired it to the `SubmitOrder` and `CancelOrder` gRPC endpoints. Verified by compiling and running unit tests inside a Docker container.
+- **2026-09-05:** Completed Phase 2a. Built the Go gRPC client and REST API. Verified by bringing up the containers and executing a test sequence against `localhost:8080`.
+- **2026-09-05:** Completed Phase 2b (WebSocket Hub). Upgraded `/ws` endpoint via `gorilla/websocket`, managed connected clients with mutexes and buffered channels, wired it to the gRPC client callbacks. Verified with a background Go script inside the `golang` Docker container capturing live streaming broadcast when POSTing orders:
   ```text
-  Running tests...
-  test_exact_match passed
-  test_partial_fill passed
-  test_price_time_priority passed
-  test_no_match passed
-  test_sweep_multiple_levels passed
-  test_cancellation passed
-  ALL TESTS PASSED
+  2026/09/05 07:15:55 Connected to ws://localhost:8080/ws
+  {"data":{"bids":[{"price":101.5,"total_quantity":20}],"timestamp_ns":1788592863257347068},"type":"book"}
+  {"data":{"timestamp_ns":1788593300177348831},"type":"book"}
+  {"data":{"trade_id":"2","buy_order_id":"O3","sell_order_id":"O4","price":101.5,"quantity":20,"timestamp_ns":1788593300177247558},"type":"trade"}
   ```
-  Next step: Phase 2 (Golang Backend).
+  Next step: Phase 3 (React Frontend).
 
 ---
 
