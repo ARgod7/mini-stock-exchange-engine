@@ -1,72 +1,88 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import type { WsMessage } from '@/lib/api';
 
 export type WsStatus = 'connecting' | 'live' | 'reconnecting' | 'disconnected';
 
-// Backoff delays in ms: 1s, 2s, 5s, then stay at 5s
 const BACKOFF = [1000, 2000, 5000];
-const MAX_RETRIES = 20; // give up after this many consecutive failures
+const MAX_RETRIES = 20;
 
 export function useExchangeSocket(
   onMessage: (msg: WsMessage) => void,
   onStatus: (s: WsStatus) => void,
 ) {
-  const wsRef = useRef<WebSocket | null>(null);
   const retryRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const deadRef = useRef(false); // set true on unmount to stop reconnects
-
-  const WS_URL =
-    (process.env.NEXT_PUBLIC_WS_URL ?? 'ws://localhost:8080') + '/ws';
-
-  const connect = useCallback(() => {
-    if (deadRef.current) return;
-
-    onStatus(retryRef.current === 0 ? 'connecting' : 'reconnecting');
-
-    const ws = new WebSocket(WS_URL);
-    wsRef.current = ws;
-
-    ws.onopen = () => {
-      retryRef.current = 0;
-      onStatus('live');
-    };
-
-    ws.onmessage = (ev) => {
-      try {
-        const msg: WsMessage = JSON.parse(ev.data as string);
-        onMessage(msg);
-      } catch {
-        // malformed message — ignore
-      }
-    };
-
-    ws.onclose = () => {
-      if (deadRef.current) return;
-      retryRef.current += 1;
-      if (retryRef.current > MAX_RETRIES) {
-        onStatus('disconnected');
-        return;
-      }
-      const delay = BACKOFF[Math.min(retryRef.current - 1, BACKOFF.length - 1)];
-      onStatus('reconnecting');
-      timerRef.current = setTimeout(connect, delay);
-    };
-
-    ws.onerror = () => {
-      ws.close(); // triggers onclose → retry
-    };
-  }, [WS_URL, onMessage, onStatus]);
+  
+  // Use refs for callbacks so we don't need to include them in dependency arrays
+  const onMessageRef = useRef(onMessage);
+  const onStatusRef = useRef(onStatus);
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+    onStatusRef.current = onStatus;
+  }, [onMessage, onStatus]);
 
   useEffect(() => {
-    deadRef.current = false;
+    let isDead = false;
+    let ws: WebSocket | null = null;
+    
+    const WS_URL = (process.env.NEXT_PUBLIC_WS_URL ?? 'ws://localhost:8080') + '/ws';
+
+    function connect() {
+      if (isDead) return;
+
+      onStatusRef.current(retryRef.current === 0 ? 'connecting' : 'reconnecting');
+
+      ws = new WebSocket(WS_URL);
+
+      ws.onopen = () => {
+        if (isDead) {
+          ws?.close();
+          return;
+        }
+        retryRef.current = 0;
+        onStatusRef.current('live');
+      };
+
+      ws.onmessage = (ev) => {
+        if (isDead) return;
+        try {
+          const msg: WsMessage = JSON.parse(ev.data as string);
+          onMessageRef.current(msg);
+        } catch {
+          // malformed message
+        }
+      };
+
+      ws.onclose = () => {
+        if (isDead) return;
+        
+        retryRef.current += 1;
+        if (retryRef.current > MAX_RETRIES) {
+          onStatusRef.current('disconnected');
+          return;
+        }
+        const delay = BACKOFF[Math.min(retryRef.current - 1, BACKOFF.length - 1)];
+        onStatusRef.current('reconnecting');
+        timerRef.current = setTimeout(connect, delay);
+      };
+
+      ws.onerror = () => {
+        // Will trigger onclose
+        ws?.close();
+      };
+    }
+
     connect();
+
     return () => {
-      deadRef.current = true;
+      isDead = true;
       if (timerRef.current) clearTimeout(timerRef.current);
-      wsRef.current?.close();
+      if (ws) {
+        ws.onclose = null; // Prevent onclose from firing and triggering reconnect
+        ws.close();
+      }
     };
-  }, [connect]);
+  }, []); // Empty dependency array ensures this runs exactly once per mount
 }

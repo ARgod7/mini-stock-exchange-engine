@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import MarketStats from '@/components/MarketStats';
 import OrderBook from '@/components/OrderBook';
 import LiveTrades from '@/components/LiveTrades';
@@ -14,6 +14,9 @@ export default function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [wsStatus, setWsStatus] = useState<WsStatus>('connecting');
 
+  // Track processed trade IDs to prevent duplicate processing (e.g., from WS reconnects or fetch race conditions)
+  const processedTrades = useRef<Set<string>>(new Set());
+
   // Initial fetch
   useEffect(() => {
     async function loadData() {
@@ -26,6 +29,11 @@ export default function Dashboard() {
         setBook(b);
         setTrades(t);
         setStats(s);
+        
+        // Add all fetched trades to the processed set
+        if (t) {
+          t.forEach(trade => processedTrades.current.add(trade.trade_id));
+        }
       } catch (err) {
         console.error('Failed to fetch initial data:', err);
       }
@@ -37,11 +45,20 @@ export default function Dashboard() {
     if (msg.type === 'book') {
       setBook(msg.data);
     } else if (msg.type === 'trade') {
+      const tradeId = msg.data.trade_id;
+      
+      // Deduplicate: if we've already seen this trade, ignore it
+      if (processedTrades.current.has(tradeId)) {
+        return;
+      }
+      processedTrades.current.add(tradeId);
+
       setTrades((prev) => {
         if (!prev) return [msg.data];
         return [msg.data, ...prev].slice(0, 100); // keep last 100
       });
-      // Update stats optimistically based on trade
+      
+      // Update stats optimistically based on the new trade
       setStats((prev) => {
         if (!prev) return prev;
         return {
