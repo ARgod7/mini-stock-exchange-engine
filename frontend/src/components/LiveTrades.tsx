@@ -15,6 +15,29 @@ export default function LiveTrades({ trades }: { trades: Trade[] | null }) {
     );
   }
 
+  // Pre-calculate tick directions for all trades
+  // trades[0] is the newest trade, trades[trades.length - 1] is the oldest.
+  // We use the tick rule: if price > previous price => BUY (uptick)
+  // if price < previous price => SELL (downtick)
+  // if price == previous price => inherit previous direction (zero-uptick or zero-downtick)
+  const tradeSides: ('BUY' | 'SELL')[] = new Array(trades.length).fill('BUY'); // default
+  
+  // Start from the oldest and move to the newest to carry forward the tick state
+  let lastDirection: 'BUY' | 'SELL' = 'BUY'; // Arbitrary default for the very first trade ever
+  for (let i = trades.length - 1; i >= 0; i--) {
+    if (i < trades.length - 1) {
+      const currentPrice = trades[i].price;
+      const prevPrice = trades[i+1].price;
+      if (currentPrice > prevPrice) {
+        lastDirection = 'BUY';
+      } else if (currentPrice < prevPrice) {
+        lastDirection = 'SELL';
+      }
+      // If equal, lastDirection remains unchanged
+    }
+    tradeSides[i] = lastDirection;
+  }
+
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden flex flex-col h-full">
       <div className="px-4 py-3 border-b border-gray-700">
@@ -34,29 +57,32 @@ export default function LiveTrades({ trades }: { trades: Trade[] | null }) {
         {trades.length === 0 ? (
           <div className="text-gray-500 text-xs italic p-4 text-center">No trades yet.</div>
         ) : (
-          trades.map((t) => (
-            <div
-              key={t.trade_id}
-              className="grid grid-cols-4 px-4 py-1.5 text-xs border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors"
-            >
-              <span
-                className={`font-mono tabular-nums font-semibold ${
-                  t.side === 'BUY' ? 'text-green-400' : 'text-red-400'
-                }`}
+          trades.map((t, i) => {
+            const computedSide = tradeSides[i];
+            return (
+              <div
+                key={t.trade_id}
+                className="grid grid-cols-4 px-4 py-1.5 text-xs border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors"
               >
-                {t.price.toFixed(2)}
-              </span>
-              <span className="text-right text-gray-300 tabular-nums">{t.quantity}</span>
-              <span
-                className={`text-right text-xs uppercase font-medium ${
-                  t.side === 'BUY' ? 'text-green-600' : 'text-red-600'
-                }`}
-              >
-                {t.side === 'BUY' ? '▲ Buy' : '▼ Sell'}
-              </span>
-              <span className="text-right text-gray-500 font-mono">{fmtTime(t.timestamp_ns)}</span>
-            </div>
-          ))
+                <span
+                  className={`font-mono tabular-nums font-semibold ${
+                    computedSide === 'BUY' ? 'text-green-400' : 'text-red-400'
+                  }`}
+                >
+                  {t.price.toFixed(2)}
+                </span>
+                <span className="text-right text-gray-300 tabular-nums">{t.quantity}</span>
+                <span
+                  className={`text-right text-xs uppercase font-medium ${
+                    computedSide === 'BUY' ? 'text-green-600' : 'text-red-600'
+                  }`}
+                >
+                  {computedSide === 'BUY' ? '▲ Buy' : '▼ Sell'}
+                </span>
+                <span className="text-right text-gray-500 font-mono">{fmtTime(t.timestamp_ns)}</span>
+              </div>
+            );
+          })
         )}
       </div>
     </div>

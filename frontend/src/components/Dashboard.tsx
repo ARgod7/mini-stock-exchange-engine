@@ -14,7 +14,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [wsStatus, setWsStatus] = useState<WsStatus>('connecting');
 
-  // Track processed trade IDs to prevent duplicate processing (e.g., from WS reconnects or fetch race conditions)
+  // Track processed trade IDs to prevent duplicate processing
   const processedTrades = useRef<Set<string>>(new Set());
 
   // Initial fetch
@@ -30,7 +30,6 @@ export default function Dashboard() {
         setTrades(t);
         setStats(s);
         
-        // Add all fetched trades to the processed set
         if (t) {
           t.forEach(trade => processedTrades.current.add(trade.trade_id));
         }
@@ -47,7 +46,6 @@ export default function Dashboard() {
     } else if (msg.type === 'trade') {
       const tradeId = msg.data.trade_id;
       
-      // Deduplicate: if we've already seen this trade, ignore it
       if (processedTrades.current.has(tradeId)) {
         return;
       }
@@ -55,10 +53,9 @@ export default function Dashboard() {
 
       setTrades((prev) => {
         if (!prev) return [msg.data];
-        return [msg.data, ...prev].slice(0, 100); // keep last 100
+        return [msg.data, ...prev].slice(0, 100);
       });
       
-      // Update stats optimistically based on the new trade
       setStats((prev) => {
         if (!prev) return prev;
         return {
@@ -71,6 +68,19 @@ export default function Dashboard() {
   }, []);
 
   useExchangeSocket(handleWsMessage, setWsStatus);
+
+  // Derive latest book stats directly from the live book state 
+  // so they never drift from what's actually rendered in the OrderBook component.
+  const derivedStats = stats ? { ...stats } : null;
+  if (derivedStats && book) {
+    const bids = book.bids || [];
+    const asks = book.asks || [];
+    derivedStats.best_bid = bids.length > 0 ? bids[0].price : null;
+    derivedStats.best_ask = asks.length > 0 ? asks[0].price : null;
+    derivedStats.spread = derivedStats.best_bid !== null && derivedStats.best_ask !== null 
+      ? derivedStats.best_ask - derivedStats.best_bid 
+      : null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
@@ -113,7 +123,7 @@ export default function Dashboard() {
 
       {/* Stats bar */}
       <div className="border-b border-gray-700/80 px-6 py-3 bg-gray-900">
-        <MarketStats stats={stats} />
+        <MarketStats stats={derivedStats} />
       </div>
 
       {/* Main content */}
