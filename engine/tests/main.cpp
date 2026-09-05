@@ -53,12 +53,20 @@ void test_partial_fill() {
     ask.set_quantity(15);
     book.submit_order(ask, trades);
     
+    std::cout << "  [test_partial_fill] Number of trades: expected 1, actual " << trades.size() << "\n";
     assert(trades.size() == 1);
+    
+    std::cout << "  [test_partial_fill] Trade quantity: expected 10, actual " << trades[0].quantity() << "\n";
     assert(trades[0].quantity() == 10);
     
     auto snap = book.get_snapshot();
+    std::cout << "  [test_partial_fill] Remaining bids levels: expected 0, actual " << snap.bids_size() << "\n";
     assert(snap.bids_size() == 0);
+    
+    std::cout << "  [test_partial_fill] Remaining asks levels: expected 1, actual " << snap.asks_size() << "\n";
     assert(snap.asks_size() == 1);
+    
+    std::cout << "  [test_partial_fill] Resting ask quantity: expected 5, actual " << snap.asks(0).total_quantity() << "\n";
     assert(snap.asks(0).total_quantity() == 5);
     
     std::cout << "test_partial_fill passed\n";
