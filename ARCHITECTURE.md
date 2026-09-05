@@ -151,11 +151,11 @@ Each phase has: goal, tasks, definition of done (DoD), and recommended agent mod
 ### Phase 1 — C++ Matching Engine
 **Goal:** Correct, tested price-time priority matching engine behind a gRPC server.
 **Tasks:**
-- [ ] Order book data structure: sorted map of price → FIFO queue of orders (bids descending, asks ascending)
-- [ ] Matching algorithm: incoming order matches against best opposite price, partial fills supported
-- [ ] gRPC server implementing `SubmitOrder`, `CancelOrder`, `StreamTrades`, `StreamBookUpdates`
-- [ ] Thread safety (mutex-protected book, since gRPC handles concurrent calls)
-- [ ] Unit tests: exact price match, partial fill, price-time priority ordering, cancel mid-book
+- [x] Order book data structure: sorted map of price → FIFO queue of orders (bids descending, asks ascending)
+- [x] Matching algorithm: incoming order matches against best opposite price, partial fills supported
+- [x] gRPC server implementing `SubmitOrder`, `CancelOrder`, `StreamTrades`, `StreamBookUpdates`
+- [x] Thread safety (mutex-protected book, since gRPC handles concurrent calls)
+- [x] Unit tests: exact price match, partial fill, price-time priority ordering, cancel mid-book
 **DoD:** `ctest` passes; engine runs standalone and accepts orders via a gRPC test client.
 **Recommended model:** Gemini 3.1 Pro (High) — this is the core logic, needs real reasoning depth.
 
@@ -219,6 +219,8 @@ Each phase has: goal, tasks, definition of done (DoD), and recommended agent mod
 - **2026-09-04:** Chose gRPC over cgo for Go↔C++ communication. Reason: cleaner deploy story, better interview narrative, avoids cgo cross-compilation issues.
 - **2026-09-04:** Both backend processes ship in one Docker container on Railway; frontend on Vercel. Reason: matches original project's deploy targets, keeps it simple.
 - **2026-09-04:** Used `vcpkg` as the strategy for finding gRPC/Protobuf in `CMakeLists.txt` but deferred actual stub generation to a Dockerized script (`generate_protos.ps1`) because local tooling (Docker, Go, CMake) was missing in the environment.
+- **2026-09-05:** C++ matching engine data structure chosen: `std::map` keyed by price, containing `std::deque` of orders. Reason: provides fast sorted price level traversal, while `deque` supports fast front-popping (FIFO match) and middle-erasure (cancel).
+- **2026-09-05:** Used Ubuntu `pkg-config` in `CMakeLists.txt` rather than pure `find_package` for `gRPC` because the default Ubuntu `libgrpc++-dev` doesn't export the `gRPCConfig.cmake` file properly.
 
 ---
 
@@ -227,6 +229,18 @@ Each phase has: goal, tasks, definition of done (DoD), and recommended agent mod
 
 - **2026-09-04:** Architecture approved. No code written yet. Next step: Phase 0.
 - **2026-09-04:** Completed Phase 0. Created repository scaffold, finalized `exchange.proto`, set up `go.mod`, `CMakeLists.txt` and `docker-compose.yml`. Generated a script `generate_protos.ps1` to build the stubs via Docker (as local tools were not available). Next step: Phase 1 (C++ Matching Engine).
+- **2026-09-05:** Completed Phase 1 (Steps 1a and 1b). Implemented the C++ matching engine (OrderBook) with price-time priority matching, partial fills, thread-safety, and order cancellation. Wired it to the `SubmitOrder` and `CancelOrder` gRPC endpoints. Verified by compiling and running unit tests inside a Docker container:
+  ```text
+  Running tests...
+  test_exact_match passed
+  test_partial_fill passed
+  test_price_time_priority passed
+  test_no_match passed
+  test_sweep_multiple_levels passed
+  test_cancellation passed
+  ALL TESTS PASSED
+  ```
+  Next step: Phase 2 (Golang Backend).
 
 ---
 

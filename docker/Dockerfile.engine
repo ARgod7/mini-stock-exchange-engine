@@ -1,2 +1,18 @@
 FROM ubuntu:22.04
-CMD ["echo", "Engine service placeholder"]
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    build-essential \
+    cmake \
+    libgrpc++-dev \
+    protobuf-compiler-grpc \
+    libprotobuf-dev \
+    protobuf-compiler \
+    pkg-config
+
+WORKDIR /app
+COPY proto/ /app/proto/
+COPY engine/ /app/engine/
+
+WORKDIR /app/engine
+RUN mkdir build && cd build && cmake .. && make
+
+CMD ["./build/engine_test"]
