@@ -9,6 +9,10 @@ void MatchingEngineServiceImpl::Run(const std::string& server_address) {
     builder.RegisterService(this);
     
     std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+    if (!server) {
+        std::cerr << "Failed to start server on " << server_address << std::endl;
+        exit(1);
+    }
     std::cout << "Engine Server listening on " << server_address << std::endl;
     server->Wait();
 }

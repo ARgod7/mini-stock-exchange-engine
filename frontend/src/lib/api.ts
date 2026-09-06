@@ -36,7 +36,7 @@ export type WsMessage =
 // ─── API helpers ──────────────────────────────────────────────────────────────
 
 // Use Next.js proxy for REST to bypass CORS
-const BASE = '/api';
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 
 export async function fetchBook(): Promise<BookSnapshot> {
   const r = await fetch(`${BASE}/orderbook`);
@@ -72,4 +72,5 @@ export async function postOrder(payload: {
   if (!r.ok) throw new Error(data?.message ?? `POST /orders ${r.status}`);
   return data;
 }
+
 

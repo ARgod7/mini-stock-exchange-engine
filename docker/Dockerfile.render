@@ -1,0 +1,33 @@
+# Stage 1: Build C++ Engine
+FROM ubuntu:22.04 AS engine-builder
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    build-essential cmake libgrpc++-dev protobuf-compiler-grpc libprotobuf-dev protobuf-compiler pkg-config ca-certificates
+
+WORKDIR /app
+COPY proto/ /app/proto/
+COPY engine/ /app/engine/
+
+WORKDIR /app/engine
+RUN mkdir build && cd build && cmake .. && make
+
+# Stage 2: Build Go Backend
+FROM golang:1.22 AS backend-builder
+WORKDIR /app
+COPY backend/go.mod ./backend/
+COPY backend/ /app/backend/
+
+WORKDIR /app/backend
+RUN go mod tidy
+RUN go build -o backend_server ./cmd/server
+
+# Stage 3: Runtime
+FROM engine-builder
+WORKDIR /app
+RUN cp /app/engine/build/engine_server ./engine_server
+COPY --from=backend-builder /app/backend/backend_server ./backend_server
+COPY docker/entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+
+EXPOSE 8080
+
+ENTRYPOINT ["./entrypoint.sh"]

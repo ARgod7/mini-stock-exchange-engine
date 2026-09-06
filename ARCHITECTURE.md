@@ -25,7 +25,7 @@ If any implementation decision conflicts with this table, this table wins.
 ```
 ┌─────────────────┐     WebSocket / REST      ┌──────────────────────────┐     gRPC      ┌──────────────────────┐
 │   Next.js UI     │ ───────────────────────► │      Go Backend           │ ────────────► │  C++ Matching Engine  │
-│  (Vercel)        │ ◄─────────────────────── │  (Railway, Docker)        │ ◄──────────── │  (same container)     │
+│  (Vercel)        │ ◄─────────────────────── │  (Render, Docker)        │ ◄──────────── │  (same container)     │
 │                  │  live book/trades/stats   │  REST API + WS Hub +      │  orders/fills │  price-time priority   │
 └─────────────────┘                            │  gRPC client              │               │  order book, matching  │
                                                 └──────────────────────────┘               └──────────────────────┘
@@ -36,7 +36,7 @@ If any implementation decision conflicts with this table, this table wins.
 - Matches "Client-Server Architecture" and "RESTful API Design" resume skills
 - No cross-compilation pain with cgo
 
-**Deployment:** Both C++ engine and Go backend run in **one Docker container** on Railway (process supervisor, e.g. `supervisord` or a tiny shell script starting both). Next.js deploys separately to Vercel.
+**Deployment:** Both C++ engine and Go backend run in **one Docker container** on Render (process supervisor, e.g. `supervisord` or a tiny shell script starting both). Next.js deploys separately to Vercel.
 
 ---
 
@@ -195,11 +195,11 @@ Each phase has: goal, tasks, definition of done (DoD), and recommended agent mod
 **Goal:** Live, shareable URLs.
 **Tasks:**
 - [ ] Multi-stage Dockerfile building both engine and backend, running both via a supervisor
-- [ ] Deploy container to Railway
-- [ ] Deploy Next.js to Vercel, point at Railway backend URL
+- [ ] Deploy container to Render
+- [ ] Deploy Next.js to Vercel, point at Render backend URL
 - [ ] CORS, env vars, health check endpoint
 - [ ] End-to-end smoke test on live URLs
-**DoD:** A public Vercel URL shows a live, working exchange talking to a live Railway backend.
+**DoD:** A public Vercel URL shows a live, working exchange talking to a live Render backend.
 **Recommended model:** Gemini 3.8 Flash (Medium) — config-heavy, not logic-heavy.
 
 ### Phase 6 — Docs & Interview Readiness
@@ -216,7 +216,7 @@ Each phase has: goal, tasks, definition of done (DoD), and recommended agent mod
 ## 6. Architecture & Design Decisions (Log)
 
 - **2026-09-04:** Chose gRPC over cgo for Go↔C++ communication. Reason: cleaner deploy story, better interview narrative, avoids cgo cross-compilation issues.
-- **2026-09-04:** Both backend processes ship in one Docker container on Railway; frontend on Vercel. Reason: matches original project's deploy targets, keeps it simple.
+- **2026-09-04:** Both backend processes ship in one Docker container on Render; frontend on Vercel. Reason: matches original project's deploy targets, keeps it simple.
 - **2026-09-04:** Used `vcpkg` as the strategy for finding gRPC/Protobuf in `CMakeLists.txt` but deferred actual stub generation to a Dockerized script (`generate_protos.ps1`) because local tooling (Docker, Go, CMake) was missing in the environment.
 - **2026-09-05:** C++ matching engine data structure chosen: `std::map` keyed by price, containing `std::deque` of orders. Reason: provides fast sorted price level traversal, while `deque` supports fast front-popping (FIFO match) and middle-erasure (cancel).
 - **2026-09-05:** Used Ubuntu `pkg-config` in `CMakeLists.txt` rather than pure `find_package` for `gRPC` because the default Ubuntu `libgrpc++-dev` doesn't export the `gRPCConfig.cmake` file properly.
@@ -252,4 +252,5 @@ Each phase has: goal, tasks, definition of done (DoD), and recommended agent mod
 
 
 - **2026-09-06:** Fixed duplicate trade bug in Phase 3b. **Cause:** React 18 Strict Mode mounts, unmounts, and remounts components. The \useExchangeSocket\ hook's cleanup function closed the first WebSocket, but its \onclose\ handler used a mutable ref (\deadRef\) which was reset to \alse\ by the second mount before the first socket finished closing. This caused the first socket to trigger a reconnect, resulting in *two* active WebSocket connections pushing identical trades to the frontend state. **Fix:** 1) Replaced the component-level \deadRef\ with a closure-scoped \isDead\ variable inside the \useEffect\ to ensure each connection instance accurately tracks its own lifecycle. 2) Added a \Set<string>\ in \Dashboard.tsx\ to explicitly deduplicate incoming WS trades by \	rade_id\ to guard against race conditions between the initial \GET /trades\ fetch and the WS stream.
+
 

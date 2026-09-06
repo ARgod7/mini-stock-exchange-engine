@@ -24,6 +24,21 @@ func mapTrade(t *pb.Trade) map[string]interface{} {
 	}
 }
 
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	engineAddr := os.Getenv("ENGINE_ADDR")
 	if engineAddr == "" {
@@ -65,7 +80,7 @@ func main() {
 	mux.HandleFunc("/ws", hub.HandleWebSocket)
 	
 	log.Println("Starting backend server on :8080")
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	if err := http.ListenAndServe(":8080", corsMiddleware(mux)); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
 }

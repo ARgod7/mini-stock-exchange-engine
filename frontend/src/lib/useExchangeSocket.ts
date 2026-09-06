@@ -27,7 +27,7 @@ export function useExchangeSocket(
     let isDead = false;
     let ws: WebSocket | null = null;
     
-    const WS_URL = (process.env.NEXT_PUBLIC_WS_URL ?? 'ws://localhost:8080') + '/ws';
+    const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? (typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss://' : 'ws://') + (typeof window !== 'undefined' ? window.location.host : 'localhost:3000') + '/api/ws';
 
     function connect() {
       if (isDead) return;
@@ -86,3 +86,4 @@ export function useExchangeSocket(
     };
   }, []); // Empty dependency array ensures this runs exactly once per mount
 }
+

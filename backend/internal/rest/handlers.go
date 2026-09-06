@@ -24,6 +24,10 @@ func (s *Server) RegisterHandlers(mux *http.ServeMux) {
 	mux.HandleFunc("/orderbook", s.handleOrderBook)
 	mux.HandleFunc("/trades", s.handleTrades)
 	mux.HandleFunc("/stats", s.handleStats)
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
 }
 
 func (s *Server) handleOrders(w http.ResponseWriter, r *http.Request) {
